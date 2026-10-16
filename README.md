@@ -1,3 +1,23 @@
-# Basic lane detention using OpenCV
+# Basic Lane Detection with OpenCV
 
-This program is created on my journey to learn the course "Self Driving Cars" In order to use it just type python main.py <FILENAME> <1/2> (<FILENAME> = #name of the image/video file make sure it is present in the same directory <1/2> = 1 is for image, 2 is for videos)
+A computer vision learning exercise created while studying self-driving car concepts. The script accepts an image or video file and a mode argument.
+
+## Usage
+
+Install a Python environment compatible with the imports in `main.py`, then run:
+
+```bash
+python main.py image.jpg 1
+python main.py video.mp4 2
+```
+
+- `1`: image input.
+- `2`: video input.
+
+Place the input file in the working directory, or supply a suitable path.
+
+## Scope
+
+This is an educational image-processing experiment. It is not an autonomous-driving component or a validated road-safety system. Behaviour depends on the supplied imagery and the parameters in `main.py`.
+
+[Profile and project directory](https://github.com/zohaibjan)
