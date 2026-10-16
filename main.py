@@ -6,7 +6,7 @@ import sys
 
 def convertToGray (image):
     gray = np.copy(image)
-    gray = cv2.cvtColor(gray, cv2.COLOR_RGBA2GRAY)
+    gray = cv2.cvtColor(gray, cv2.COLOR_BGR2GRAY)
     return gray
 
 def blurImage(grayImage):
@@ -35,30 +35,36 @@ def drawLines(image, lines):
 def avgLines(image, lines):
     left_fit = []
     right_fit = []
+    if lines is None:
+        return np.empty((0, 4), dtype=int)
     for line in lines:
         x1, y1, x2, y2 = line.reshape(4)
-        parameters = np.polyfit((x1,x2), (y1,y2),1)
-        slope = parameters[0]
-        intercept = parameters[1]
-        if slope < 0:
-            left_fit.append((slope, intercept))
-        else:
-            right_fit.append((slope, intercept))
-    left_fit_avg = np.average(left_fit, axis=0)
-    right_fit_avg = np.average(right_fit, axis=0)
-    left_line = getCoordinates(image, left_fit_avg)
-    right_line = getCoordinates(image, right_fit_avg)
-    return np.array([left_line, right_line])
+        if x1 == x2:
+            continue
+        slope = (y2 - y1) / (x2 - x1)
+        intercept = y1 - slope * x1
+        if not np.isfinite(slope) or not np.isfinite(intercept) or abs(slope) < 1e-8:
+            continue
+        (left_fit if slope < 0 else right_fit).append((slope, intercept))
+    averaged = []
+    for fits in (left_fit, right_fit):
+        if fits:
+            averaged.append(getCoordinates(image, np.mean(fits, axis=0)))
+    return np.asarray(averaged, dtype=int).reshape(-1, 4)
+
 
 def getCoordinates(image, parameters):
     slope, intercept = parameters
     y1 = image.shape[0]
-    y2 = int(y1*(3/5))
-    x1 = int((y1-intercept)/slope)
-    x2 = int((y2-intercept)/slope)
-    return np.array([x1,y1, x2,y2])
+    y2 = int(y1 * (3 / 5))
+    x1 = int((y1 - intercept) / slope)
+    x2 = int((y2 - intercept) / slope)
+    return np.array([x1, y1, x2, y2])
+
 
 def mainProgram(image):
+    if image is None:
+        raise ValueError('Could not read an input image or video frame')
     laneImage = np.copy(image)
     im = convertToGray(image)
     im = blurImage(im)
@@ -76,15 +82,16 @@ if __name__ == "__main__":
         #laneImage = np.copy(im)
         file = sys.argv[1]
         flag = int(sys.argv[2])
-        extension = file.split('.')[1]
-        if flag == 1 and extension !='mp4':
+        if flag == 1:
             im = cv2.imread(file)
             mainProgram(im)
             cv2.waitKey(0)
         elif flag == 2:
             cap = cv2.VideoCapture(file)
             while cap.isOpened():
-                _, frame = cap.read()
+                ok, frame = cap.read()
+                if not ok:
+                    break
                 mainProgram(frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break

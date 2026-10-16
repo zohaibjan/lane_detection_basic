@@ -4,7 +4,7 @@ A computer vision learning exercise created while studying self-driving car conc
 
 ## Usage
 
-Install a Python environment compatible with the imports in `main.py`, then run:
+Install NumPy, OpenCV and Matplotlib in your Python environment, then run from a desktop session with display support:
 
 ```bash
 python main.py image.jpg 1
@@ -21,3 +21,7 @@ Place the input file in the working directory, or supply a suitable path.
 This is an educational image-processing experiment. It is not an autonomous-driving component or a validated road-safety system. Behaviour depends on the supplied imagery and the parameters in `main.py`.
 
 [Profile and project directory](https://github.com/zohaibjan)
+
+## Checks and limitations
+
+The code handles frames without detected lanes, one-sided detections, vertical/horizontal segments and video end-of-file. Synthetic geometry checks run with `python -m unittest discover -s tests -v`; they do not validate camera footage or driving performance. The region-of-interest polygon remains tuned to the original image resolution and needs adjustment for other cameras.
